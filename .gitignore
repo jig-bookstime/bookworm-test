@@ -30,3 +30,5 @@ devTools/
 .notification.testtoolstore.json
 
 teamsapp.*
+
+/manifest.json

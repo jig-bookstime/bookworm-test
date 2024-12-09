@@ -56,10 +56,23 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 });
 
 // Listen for incoming requests.
+// server.post("/api/messages", async (req, res) => {
+//     await adapter.process(req, res, async (context) => {
+//         await bot.run(context);
+//     });
+// });
+
 server.post("/api/messages", async (req, res) => {
-    await adapter.process(req, res, async (context) => {
-        await bot.run(context);
-    });
+    console.log("Received request at /api/messages:", req.body);
+    try {
+        await adapter.process(req, res, async (context) => {
+            console.log("Processing context:", context.activity);
+            await bot.run(context);
+        });
+    } catch (error) {
+        console.error("Error during message processing:", error);
+        res.status(500).send("Error processing message");
+    }
 });
 
 // Gracefully shutdown HTTP server

@@ -6,6 +6,7 @@ class TeamsBot extends TeamsActivityHandler {
 
         this.onMessage(async (context, next) => {
             console.log("Running with Message Activity.");
+            console.log("Message received:", context.activity.text); // Log the incoming message
             const removedMentionText = TurnContext.removeRecipientMention(
                 context.activity
             );
