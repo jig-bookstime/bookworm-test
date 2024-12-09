@@ -51,9 +51,11 @@ const bot = new TeamsBot();
 // Create HTTP server.
 const server = restify.createServer();
 server.use(restify.plugins.bodyParser());
-const port = process.env.PORT || 443;
+const port = 443;
 server.listen(port, function () {
-    console.log(`\nBot started, ${server.name} listening to ${server.url}`);
+    console.log(
+        `\nBot: ${server.name} listening to ${server.url} running on port ${port}`
+    );
 });
 
 // Listen for incoming requests.
