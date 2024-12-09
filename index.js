@@ -79,7 +79,7 @@ server.post("/api/messages", async (req, res) => {
 });
 
 server.get("/", async (req, res) => {
-    console.log("GET API ENDPOINT HIT");
+    console.log("GET API ENDPOINT hit from POSTMAN");
     res.json({
         message: "GET API Endpoint hit",
         MicrosoftAppId: process.env.BOT_ID,
