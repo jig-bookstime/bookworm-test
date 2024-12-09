@@ -1,10 +1,5 @@
-// index.js is used to setup and configure your bot
-
-// Import required packages
 const restify = require("restify");
 
-// Import required bot services.
-// See https://aka.ms/bot-services to learn more about the different parts of a bot.
 const {
     CloudAdapter,
     ConfigurationServiceClientCredentialFactory,
@@ -13,8 +8,7 @@ const {
 const {TeamsBot} = require("./teamsBot");
 const config = require("./config");
 
-// Create adapter.
-// See https://aka.ms/about-bot-adapter to learn more about adapters.
+// Create adapter
 const credentialsFactory = new ConfigurationServiceClientCredentialFactory(
     config
 );
@@ -27,10 +21,6 @@ const botFrameworkAuthentication = new ConfigurationBotFrameworkAuthentication(
 const adapter = new CloudAdapter(botFrameworkAuthentication);
 
 adapter.onTurnError = async (context, error) => {
-    // This check writes out errors to console log .vs. app insights.
-    // NOTE: In production environment, you should consider logging this to Azure
-    //       application insights. See https://aka.ms/bottelemetry for telemetry
-    //       configuration instructions.
     console.error(`\n [onTurnError] unhandled error: ${error}`);
 
     // Only send error message for user messages, not for other message types so the bot doesn't spam a channel or chat.
@@ -51,41 +41,51 @@ const bot = new TeamsBot();
 // Create HTTP server.
 const server = restify.createServer();
 server.use(restify.plugins.bodyParser());
+
 const port = 443;
-server.listen(port, function () {
-    console.log(
-        `\nBot: ${server.name} listening to ${server.url} running on port ${port}`
-    );
+
+// Listen on proper port
+server.listen(port, () => {
+    console.log(`\nBot server listening on port ${port}`);
 });
 
-// Listen for incoming requests.
-// server.post("/api/messages", async (req, res) => {
-//     await adapter.process(req, res, async (context) => {
-//         await bot.run(context);
-//     });
-// });
-
+// Main bot message endpoint
 server.post("/api/messages", async (req, res) => {
-    console.log("Received request at /api/messages:", req.body);
+    console.log("Received request at /api/messages:", {
+        type: req.body.type,
+        text: req.body.text,
+        timestamp: new Date().toISOString(),
+    });
+
     try {
         await adapter.process(req, res, async (context) => {
-            console.log("Processing context:", context.activity);
             await bot.run(context);
         });
     } catch (error) {
-        console.error("Error during message processing:", error);
-        res.status(500).send("Error processing message");
+        console.error("Error processing message:", error);
+        res.status(500).json({
+            error: "Error processing message",
+            details: error.message,
+        });
     }
 });
 
-server.get("/", async (req, res) => {
-    console.log("GET API ENDPOINT hit from POSTMAN");
+// Health check endpoint
+server.get("/health", async (req, res) => {
     res.json({
-        message: "GET API Endpoint hit",
-        MicrosoftAppId: process.env.BOT_ID,
-        MicrosoftAppType: process.env.BOT_TYPE,
-        MicrosoftAppTenantId: process.env.BOT_TENANT_ID,
-        MicrosoftAppPassword: process.env.BOT_PASSWORD,
+        status: "healthy",
+        timestamp: new Date().toISOString(),
+    });
+});
+
+// Diagnostic endpoint
+server.get("/api/config", async (req, res) => {
+    res.json({
+        botId: process.env.BOT_ID ? "Configured" : "Missing",
+        tenantId: process.env.BOT_TENANT_ID ? "Configured" : "Missing",
+        appType: process.env.BOT_TYPE ? "Configured" : "Missing",
+        port: port,
+        nodeVersion: process.version,
     });
 });
 
