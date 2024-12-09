@@ -78,6 +78,16 @@ server.post("/api/messages", async (req, res) => {
     }
 });
 
+server.get("/", async (req, res) => {
+    res.json({
+        message: "GET API Endpoint hit",
+        MicrosoftAppId: process.env.BOT_ID,
+        MicrosoftAppType: process.env.BOT_TYPE,
+        MicrosoftAppTenantId: process.env.BOT_TENANT_ID,
+        MicrosoftAppPassword: process.env.BOT_PASSWORD,
+    });
+});
+
 // Gracefully shutdown HTTP server
 [
     "exit",
